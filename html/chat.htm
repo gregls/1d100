@@ -1,0 +1,17 @@
+<div class="chat"  ng-controller="messageController">
+    <!--<div class="row chat">-->
+    <div class="room">
+        <div id="messages" class="fullHeight">
+        </div>
+        <div id="playerList"></div>
+    </div>
+    <!--</div>-->
+    <div id="chatText" class="formChat">
+        <!--<div class="col-xs-9 col-sm-10">-->
+            <input id="message" ng-model="message" ng-keydown="onKeyDown($event)" autocomplete="off" placeholder="Tapez votre texte ici. Pour tirer 3d6, tapez !3d6. Pour tirer avec un dé libre, tapez !3D6."/>
+        <!--</div>
+        <div class="col-xs-2 col-sm-2">-->
+            <button id="chatButton" class="" ng-click="sendMessage()">Envoyer</button>
+        <!--</div> -->
+    </div>
+</div>

@@ -1,0 +1,76 @@
+html {
+    height: 100%;
+}
+body {
+    background-color: #333;
+    color:blanchedalmond;
+    height: 100%;
+    width: 100%;
+}
+body .container-fluid{
+    padding: 0px;
+    height: 100%;
+    display: flex;
+    display: -webkit-flex;
+    display: -moz-flex;
+    flex-direction: column;
+    -webkit-flex-direction: column;
+    -moz-flex-direction: column;
+    min-width: 100%;
+}
+.chat {
+    display: flex;
+    display: -webkit-flex;
+    display: -moz-flex;
+    flex: 1 1 auto;
+    -webkit-flex: 1 1 auto;
+    -moz-flex: 1 1 auto;
+    flex-direction: column;
+    -webkit-flex-direction: column;
+    -moz-flex-direction: column;
+    height: 100%;
+}
+#messages {
+    overflow-y: auto;
+    width: calc(100% - 150px);
+    height: 100%;
+}
+
+#playerList{
+    overflow-y: auto;
+    width: 150px;
+    height: 100%
+    max-height: calc(100% - 40px);
+    background-color:black;
+    margin-left: 5px; 
+    color:blueviolet;
+}
+
+.italic {
+    font-style: italic; 
+    color:cadetblue;
+}
+.formChat, .room {
+    display: flex;
+    display: -webkit-flex;
+    display: -moz-flex;
+    flex: 1 1 auto;
+    -webkit-flex: 1 1 auto;
+    -moz-flex: 1 1 auto;
+    min-height: 0px;
+}
+.formChat input {
+    flex: 1;
+    color: black;
+}
+.formChat button {
+    width: 80px; 
+    color: black;
+}
+.formChat, .formChat input, .formChat button {
+    max-height: 40px;
+}
+
+.room {
+    height: calc(100% - 40px);
+}
