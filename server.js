@@ -15,6 +15,7 @@ app.get('/', function(request, response){
 
 var playerList =[];
 var socketByRoom = [];
+var defaultRoom = 'demo';
 
 Array.prototype.max = function() {
   return Math.max.apply(null, this);
@@ -24,40 +25,64 @@ Array.prototype.min = function() {
   return Math.min.apply(null, this);
 };
 
+Date.now = function(){
+    return Math.floor(new Date().getTime()/1000);
+}
+
+io.sockets.loginExists = function(login){
+    var founded = false;
+    playerList[defaultRoom].forEach(function(player){
+        if (player.login == login){
+            founded = true;
+            return;
+        }
+    });
+    
+    return founded;
+}
+    
 io.sockets.on('connection', function(socket, pseudo){
-    var defaultRoom = 'demo';
         
     socket.on('player', function(player){
-        socket.login = ent.encode(player.login);
-        socket.join(defaultRoom);
         if (!socketByRoom[defaultRoom]){
             socketByRoom[defaultRoom] = [];
         }
-        socketByRoom[defaultRoom][socket.id] = socket;
         if (!playerList[defaultRoom]){
             playerList[defaultRoom] = new Array();
         }
         
-        playerList[defaultRoom].push(socket.login);
-        io.in(defaultRoom).emit('playerList', playerList[defaultRoom]);
+        var login = ent.encode(player.login);
         
-        io.in(defaultRoom).emit('message', {login: socket.login, message: socket.login + ' vient de se connecter sur le chat '+defaultRoom+'.', loginIncluded: true});
-        //socket.broadcast.emit('nouveau_joueur', pseudo);
+        if (io.sockets.loginExists(login)){
+            socket.emit('message', {login: login, message: 'Le login '+login+' est déjà présent dans ce chat !', loginIncluded: true, reloadToHome: true});
+            socket.disconnect({sendMessage: false});
+        } else {
+            socket.login = login;
+            socket.join(defaultRoom);
+            
+            socketByRoom[defaultRoom][socket.id] = socket;
+            
+            playerList[defaultRoom].push({login: socket.login, date: Date.now(), socketId: socket.id});
+            io.in(defaultRoom).emit('playerList', playerList[defaultRoom]);
+        
+            io.in(defaultRoom).emit('message', {login: socket.login, message: socket.login + ' vient de se connecter sur le chat '+defaultRoom+'.', loginIncluded: true});
+        }
     });
     
-    socket.on('disconnect', function(){
-        io.in(defaultRoom).emit('message', {login: socket.login, message: socket.login + ' vient de se déconnecter du chat '+defaultRoom+'.', loginIncluded: true});
+    socket.on('disconnect', function(info){
         if (playerList[defaultRoom]){
-            playerList[defaultRoom].forEach(function(login){
-                if (login == socket.login){
-                    playerList[defaultRoom].splice(login, 1);
+            playerList[defaultRoom].forEach(function(player){
+                if (player.login == socket.login){
+                    playerList[defaultRoom].splice(player, 1);
                 }
             });
         }
-        io.in(defaultRoom).emit('playerList', playerList[defaultRoom]);
+        if (info.sendMessage){
+            io.in(defaultRoom).emit('message', {login: socket.login, message: socket.login + ' vient de se déconnecter du chat '+defaultRoom+'.', loginIncluded: true});
+            io.in(defaultRoom).emit('playerList', playerList[defaultRoom]);
+        }
         socket.login = null;
         socket.leave(defaultRoom);
-        socket.disconnect();
     });
     
     socket.on('message', function(message){
@@ -88,7 +113,6 @@ io.sockets.on('connection', function(socket, pseudo){
         } else {
             io.in(defaultRoom).emit('message', {login: message.login, message: messageToSend, loginIncluded: loginIncluded});    
         }
-        
     });   
 })
 

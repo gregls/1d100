@@ -32,7 +32,7 @@ app1d100.service('chatService', function(){
 
 app1d100.controller('chatController', ['$scope', 'chatService', 'socketio', function($scope, chatService, socketio){
     if (chatService.isConnected()) {
-        socketio.emit('disconnect');
+        socketio.emit('disconnect', {sendMessage: true});
         chatService.disconnect();
     }
     
@@ -41,21 +41,17 @@ app1d100.controller('chatController', ['$scope', 'chatService', 'socketio', func
     socketio.emit('player', {login: $scope.login});
     socketio.on('playerList', function(playerList){        
         var html = '<ul>';
-        playerList.forEach(function(login, key){
-            if (login == chatService.login){
-                html = html + '<li><b><u>'+login+'</u></b></li>';
+        playerList.forEach(function(player, key){
+            if (player.login == chatService.login){
+                html = html + '<li><b><u>'+player.login+'</u></b></li>';
             } else {
-                html = html + '<li>'+login+'</li>';
+                html = html + '<li>'+player.login+'</li>';
             }
         });
         html = html + '</ul>';
         $('#playerList').html(html);
     });
     $('#message').focus();
-    /*
-    $scope.$watch('connected', function(){
-        chatService.connected = true;
-    });*/
     chatService.connect();
 }]);
 
@@ -107,6 +103,10 @@ app1d100.controller('messageController', ['$scope', 'chatService', 'socketio', f
             positionScroll = $('#messages .message:last-child').position().top;
         }
         $('#messages').animate({scrollTop: positionScroll}, 'slow');
+        if (message.reloadToHome){
+            $scope.login = null;
+            window.location.href = '/';
+        }
     });
 }]);
 
@@ -115,10 +115,10 @@ app1d100.controller('loginController', ['$scope', 'chatService', function($scope
 }]);
 
 app1d100.controller('loginFormController', ['$scope', 'chatService', 'socketio', function($scope, chatService, socketio){
-    /*if (chatService.isConnected()) {
+    if (chatService.isConnected()) {
         socketio.emit('disconnect');
         chatService.disconnect();
-    }*/
+    }
     $scope.onKeyDown = function ($event) {
         var keyCode;
         window.event ? keyCode = $event.keyCode : keyCode = $event.which;
